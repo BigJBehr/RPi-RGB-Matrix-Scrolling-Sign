@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database>
+  <item>
+    <month>11</month>
+    <day>29</day>
+    <flags>Birthday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Birthday to all</text>
+  </item>
+  <item>
+    <month>5</month>
+    <day>6</day>
+    <flags>Birthday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Birthday George</text>
+  </item>
+  <item>
+    <month>12</month>
+    <day>25</day>
+    <flags>Birthday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Birthday Gale</text>
+  </item>
+</database>

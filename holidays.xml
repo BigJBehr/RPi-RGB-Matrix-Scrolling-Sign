@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<database>
+  <item>
+    <month>1</month>
+    <day>1</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy New Year</text>
+  </item>
+  <item>
+    <month>1</month>
+    <day>Third</day>
+    <flags>Monday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Martin Luther King Day</text>
+  </item>
+  <item>
+    <month>2</month>
+    <day>2</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Ground Hog Day</text>
+  </item>
+  <item>
+    <month>2</month>
+    <day>14</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Valentine's Day</text>
+  </item>
+  <item>
+    <month>2</month>
+    <day>Third</day>
+    <flags>Monday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>President's Day</text>
+  </item>
+  <item>
+    <month>3</month>
+    <day>17</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy St. Patrick's Day</text>
+  </item>
+  <item>
+    <month>3</month>
+    <day>Second</day>
+    <flags>Saturday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Set Your Clocks Ahead Tonight</text>
+  </item>
+  <item>
+    <month>3</month>
+    <day>PalmSunday</day>
+    <flags>Sunday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Palm Sunday</text>
+  </item>
+  <item>
+    <month>3</month>
+    <day>GoodFriday</day>
+    <flags>Friday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Good Friday</text>
+  </item>
+  <item>
+    <month>3</month>
+    <day>Easter</day>
+    <flags>Sunday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Easter</text>
+  </item>
+  <item>
+    <month>4</month>
+    <day>1</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>April Fool's Day</text>
+  </item>
+  <item>
+    <month>5</month>
+    <day>Second</day>
+    <flags>Sunday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Mother's Day</text>
+  </item>
+  <item>
+    <month>5</month>
+    <day>Last</day>
+    <flags>Monday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Memorial Day</text>
+  </item>
+  <item>
+    <month>5</month>
+    <day>4</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>May the Fourth be With You</text>
+  </item>
+  <item>
+    <month>6</month>
+    <day>Third</day>
+    <flags>Sunday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Father's Day</text>
+  </item>
+  <item>
+    <month>7</month>
+    <day>4</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Independence Day</text>
+  </item>
+  <item>
+    <month>9</month>
+    <day>First</day>
+    <flags>Monday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Labor Day</text>
+  </item>
+  <item>
+    <month>10</month>
+    <day>First</day>
+    <flags>Monday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Columbus Day</text>
+  </item>
+  <item>
+    <month>10</month>
+    <day>31</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Halloween</text>
+  </item>
+  <item>
+    <month>11</month>
+    <day>First</day>
+    <flags>Saturday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Set Your Clocks Back Tonight</text>
+  </item>
+  <item>
+    <month>11</month>
+    <day>Second</day>
+    <flags>Friday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Veteran's Day</text>
+  </item>
+  <item>
+    <month>11</month>
+    <day>Fourth</day>
+    <flags>Thursday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy Thanksgiving</text>
+  </item>
+  <item>
+    <month>12</month>
+    <day>24</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Merry Christmas Eve</text>
+  </item>
+  <item>
+    <month>12</month>
+    <day>25</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Merry Christmas</text>
+  </item>
+  <item>
+    <month>12</month>
+    <day>31</day>
+    <flags>Holiday</flags>
+    <line>2</line>
+    <backgnd>0000</backgnd>
+    <foregnd>FFFF</foregnd>
+    <text>Happy New Year's Eve</text>
+  </item>
+</database>
+
