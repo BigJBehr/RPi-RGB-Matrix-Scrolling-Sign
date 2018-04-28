@@ -73,9 +73,6 @@
 # type; cd ..
 # type; cd ..
 
-
-
-
 # All of the following must be in the same directory as 'RGB-32x64.py';
 # 'fonts' directory, 'samplebase.py', 'birthdays.xml', 'holidays.xml' and
 # 'options.ini'.
@@ -99,16 +96,30 @@
 # type; sudo python RGB-32x64.py
 
 # Change permissions of rc.local so you can edit it, type
-# type; chmod 777 /etc/rc.local
+# type; sudo chmod 777 /etc/rc.local
 
 # rc.local should be executable. If not type;
-# type; /etc/rc.local enabled
+# type sudo chmod +x /etc/rc.local
+
+# to enable rc.local to run on startup
+# type /etc/rc.local enable
+
+# to disable /etc/rc.local from running on startup
+# type /etc/rc.local disable
 
 # message lists are lists of lists. each entry is a list with two values, text color
 # and the text to display.
 
 # changed to do one url at a time for headlines, like jokes does.
 
+# Added weather forcasts. Made separate function for parsing weather data.
+
+# BMP280 Temperature is reading about 5F too high. Modified to drop temperature
+# by 5 degrees F.
+
+# Apparently GitHub is stripping carriage returns out of the options.ini file.
+# This is causing an Index Out of Range error when parsing the options.ini file.
+# This is fixed in this version.
 
 # Display a runtext with double-buffering.
 import datetime
@@ -137,7 +148,7 @@ from smbus import SMBus
 
 # sensor data variables
 lastPressure = 0
-Barometer = 0
+barometer    = [0.0, 0.0, 0.0]
 
 # create an SMBUS (I2C) object, use bus 1, bus 0 is reserved
 Bme = SMBus(1)
@@ -276,7 +287,10 @@ SIGNED = 1
 # return True if the string afer '=' starts with 't' or 'T' otherwise return
 # false
 def truefalse(str):
-  s = str[0].lower()
+  s = 't'         # default to true
+  if len(str) > 0:
+    s = str[0].lower()
+    
   return 't' == s
     
 #==============================================================================
@@ -311,8 +325,7 @@ def readOptions(filename):
           if len(line) > 2:
             # split on the first '=' only
             s = line[:len(line) - 1].split('=', 1)
-            # remove trailing '\n'
-            value = s[1][:len(s[1]) - 1]
+            value = s[1][:len(s[1])]
             
             if s[0] == 'military':
               military = truefalse(value)
@@ -348,6 +361,8 @@ def readOptions(filename):
               newsUrls.append(value)
     except IOError:
       print "Failure reading options file"
+    except IndexError:
+      print "Error in options.ini: " + line
   else:
     print "Unable to find options.ini file"
                         
@@ -409,9 +424,9 @@ def dateMessage():
 # this is run while the dirtyLock has been acquired
 
 def timeMessage():
-  global militaryTime
+  global military
   
-  if militaryTime == False:
+  if military == False:
     h = datetime.datetime.now().hour
     if h > 12:
       h -= 12
@@ -576,11 +591,11 @@ def getQuoteOfTheDay():
         if len(quote) > 0:
           color = randomColor()
           if len(quote[0]) > 0:
-            ql.append([color, quote[0]])
+            ql.append([color, cleanupUnicode(quote[0])])
     
             # add the author
             if len(quote[1]) > 0:
-              ql.append([color, quote[1]])
+              ql.append([color, cleanupUnicode(quote[1])])
           else:
             # no quote given
             print 'No quote found'
@@ -614,18 +629,9 @@ def getQuoteOfTheDay():
   # while
 
 #==============================================================================
-# Get the current weather from OpenWeatherMap.org
-def getWeather():
-  global weather
-  global weatherKey
-  global weatherZip
-  global weatherList
-  global dirtyFlag
-    
-  list = []
-  delay = 900       # update every 15 minutes
-  
-  print 'Get Weather'
+# parse a line of weather information into a list of weather values.
+def parseWeather(line, id):
+  global barometer
   
   weather = ''
   temperature = 0.0
@@ -634,6 +640,144 @@ def getWeather():
   windspeed = 0.0
   winddir = 0
   windgust = 0.0
+  snow = ''
+  rain = ''
+  icon = ''
+  
+  wd = []
+  wl = line.split(',')
+  for l in wl:
+#    print(l)
+    pos = l.find('description":"')
+    if pos > 0 and len(weather) == 0:
+      weather = l[l.find(':') + 2:len(l) - 1]
+
+    pos = l.find('temp":')
+    if pos > 0:
+      temperature = float(l[pos + 6:])
+      
+    pos = l.find('pressure":')
+    if pos > 0:
+      pressure = float(l[l.find(':') + 1:])
+          
+    pos = l.find('humidity":')
+    if pos > 0:
+      humidity = float(l[l.find(':') + 1:])
+          
+    pos = l.find('speed":')
+    if pos > 0:
+      windspeed = float(l[l.rfind(':') + 1:])
+      
+    pos = l.find('deg":')
+    if pos > 0:
+      l = l.strip('}')
+      winddir = float(l[l.find(':') + 1:]) % 360.0
+      
+    pos = l.find('gust":')
+    if pos > 0:
+      windgust = float(l[l.find(':') + 1:len(l) - 1])
+  
+    pos = l.find('rain":{')
+    if pos > 0:
+     rain = l[l.find(':') + 2:len(l) - 1]
+      
+    pos = l.find('snow":{')
+    if pos > 0:
+      snow = l[l.find(':') + 2:len(l) - 1]
+      
+    pos = l.find('icon":"')
+    if pos > 0:
+     icon = l[l.find(':') + 2: len(l) - 3]
+      
+  # convert wind direction in degrees to text direction
+  if winddir < 22.5:
+      wdt = "North"
+  elif winddir < 67.5:
+      wdt = "Northeast"
+  elif winddir < 112.5:
+      wdt = "East"
+  elif winddir < 157.5:
+      wdt = "Southeast"
+  elif winddir < 202.5:
+      wdt = "South"
+  elif winddir < 247.5:
+      wdt = "Southwest"
+  elif winddir < 292.5:
+      wdt = "West"
+  elif winddir < 337.5:
+      wdt = "Northwest"
+  else:
+      wdt = "North"
+  
+  # ===== get outside temperature =====
+  # typical temperature: {'temp_max': 295.15, 'temp_kf': None, 'temp': 292.89, 'temp_min': 290.15}
+  # temperature is in Kelvin,
+  # Kelvin to Celsius, subtract 273.15
+  # Celsius to Fahrenheit, Tf = Tc * 9/5 + 32
+  ftc = temperature - 273.15
+  tf = int((ftc * 9.0 / 5.0) + 32.5)
+
+  # ===== combine status, temperature and humidity into a weather message =====
+  # "123456789-123456789-123456789-123456789-12345"
+  # "Weather: scattered clouds, 32.1F with 40% RH"
+  # "Forecast: scattered clouds, 32.1F with 40% RH"
+  # "Tomorrow: scattered clouds, 32.1F with 40% RH"
+  if id == 0:
+    msg = 'Weather: {}, {:.1f}F with {}% RH'.format(weather, tf, humidity)
+  elif id == 1:
+    msg = 'Forecast: {}, {:.1f}F with {}% RH'.format(weather, tf, humidity)
+  else:
+    msg = 'Tomorrow: {}, {:.1f}F with {}% RH'.format(weather, tf, humidity)
+
+  # ===== convert barometeric pressure into a weather message =====
+  # "123456789-123456789-123456789-123456789-12345"
+  # "Barometer: 996.3 millibars and rising"
+  # "Barometer: 996.3 millibars and falling"
+  msg += ', Barometer: {:.1f} millibars'.format(pressure)
+  if barometer[id] > pressure:
+    msg += " and falling"
+  elif barometer[id] < pressure:
+    msg += " and rising"
+
+  barometer[id] = pressure
+
+  # ===== combine wind direction and wind speed into a weather message =====
+  # "123456789-123456789-123456789-123456789-12345"
+  # "Wind from the Northeast at 25mph"
+  msg += ', Wind from the {} at {:.1f}mph'.format(wdt, windspeed)
+  
+  if windgust > 0:
+    msg += ', Gusting to {}mph'.format(windgust)
+    
+  # ===== convert rain/snow acculation into a weather message =====
+  # "123456789-123456789-123456789-123456789-12345"
+  # "Rain amount for last 3 Hours: 12.5 inches"
+
+  if len(rain) > 0:
+    amt = float(rain[rain.find('":') + 2:])
+    msg += ', Rain accumulation for last 3 Hours: {:.1f} inches'.format(amt)
+
+  if len(snow) > 0:
+    amt = float(snow[snow.find('":') + 2:])
+    msg += ', Snow accumulation for last 3 Hours: {:.1f} inches'.format(amt)
+
+  wd.append([randomColor(), msg])
+  return wd    
+    
+#==============================================================================
+# I am getting reports for three Macedons !!! Keep only the first
+# Get the current weather from OpenWeatherMap.org
+def getWeather():
+  global weather
+  global weatherKey
+  global weatherZip
+  global weatherList
+  global barometer
+  global dirtyFlag
+    
+  delay = 900       # update every 15 minutes
+  
+  print 'Get Weather'
   
   while True:
     print 'Updating weather information'
@@ -648,84 +792,15 @@ def getWeather():
     # parse the weather data
     if 200 == r.status_code:
       print 'Parsing Weather info'
+      
+      wl = r.text.split(',')
+        
       # parse the weather information
-#      print '====='
-#      print r.text
-#      print '====='
-      wlist = r.text.split(',')
-      for l in wlist:
-#        print l
-        pos = l.find('description":"')
-        if pos > 0:
-          weather = l[l.find(':') + 2:len(l) - 1]
-    
-        pos = l.find('temp":')
-        if pos > 0:
-          temperature = float(l[pos + 6:])
-          
-        pos = l.find('pressure":')
-        if pos > 0:
-          pressure = float(l[l.find(':') + 1:])
-              
-        pos = l.find('humidity":')
-        if pos > 0:
-          humidity = float(l[l.find(':') + 1:])
-              
-        pos = l.find('speed":')
-        if pos > 0:
-          windspeed = float(l[l.rfind(':') + 1:])
-          
-        pos = l.find('deg":')
-        if pos > 0:
-          l = l.strip('}')
-          winddir = float(l[l.find(':') + 1:])
-          
-        pos = l.find('gust":')
-        if pos > 0:
-          windgust = float(l[l.find(':') + 1:len(l) - 1])
-      # for
-    
-      # convert wind direction in degrees to text direction
-      if winddir < 22.5:
-          wdt = "North"
-      elif winddir < 67.5:
-          wdt = "Northeast"
-      elif winddir < 112.5:
-          wdt = "East"
-      elif winddir < 157.5:
-          wdt = "Southeast"
-      elif winddir < 202.5:
-          wdt = "South"
-      elif winddir < 247.5:
-          wdt = "Southwest"
-      elif winddir < 292.5:
-          wdt = "West"
-      elif winddir < 337.5:
-          wdt = "Northwest"
-      else:
-          wdt = "North"
-  
-      # ===== get outside temperature =====
-      # typical temperature: {'temp_max': 295.15, 'temp_kf': None, 'temp': 292.89, 'temp_min': 290.15}
-      # temperature is in Kelvin,
-      # Kelvin to Celsius, subtract 273.15
-      # Celsius to Fahrenheit, Tf = Tc * 9/5 + 32
-      ftc = temperature - 273.15
-      tf = int((ftc * 9.0 / 5.0) + 32.5)
-  
-      # ===== combine status, temperature and humidity into a weather message =====
-      msg = 'Weather: {}, {:.1f}F with {}% RH'.format(weather, tf, humidity)
+      list = parseWeather(r.text, 0)
       
-      # ===== combine wind direction and wind speed into a weather message =====
-      # "Wind from the Northeast at 25mph"
-      msg += ', Wind from the {} at {:.1f}mph'.format(wdt, windspeed)
-      
-      if windgust > 0:
-        msg += ', gusting to {}mph'.format(windgust)
+      # add forecasts to the list
+      list += getForecast()
 
-      print msg        
-      list.append([randomColor(), msg])
-      
       dirtyLock.acquire()
       del weatherList[:]
       dirtyFlag = True
@@ -735,7 +810,6 @@ def getWeather():
       
     else:
       print 'Bad error code: {}'.format(r.status_code)
-      
                 
     # sleep for some number of seconds
     time.sleep(delay)
@@ -744,45 +818,48 @@ def getWeather():
 #==============================================================================
 # Get weather forecast for the next 5 days from OpenWeatherMap.org. We only use
 # the next day forecast. There are forecasts for every 3 hours for each day.
-# 
+# Find the forcast that is 24 hours from current time, parse and add it to the
+# bottom list.
 def getForecast():
-  global forecast
   global weatherKey
   global weatherZip
-  global forecastList
-  global dirtyFlag
     
   list = []
   delay = 900       # update every 15 minutes
   
-  print 'Get Forecase'
+  print "Updating forecast information"
   
-  while True:
-    print "Updating forecast information"
-    
-    try:
-      url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&APPID={}'.format(weatherZip, weatherKey)
-      r = requests.get(url)
-    except:
-      # this occurs when we cannot connect to the OpenWeatherMap service    
-      print "Unable to connect to OpenWeatherMap.org, Key or Zipcode may be invalid"
+  try:
+    url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&APPID={}'.format(weatherZip, weatherKey)
+    r = requests.get(url)
+  except:
+    # this occurs when we cannot connect to the OpenWeatherMap service    
+    print "Unable to connect to OpenWeatherMap.org, Key or Zipcode may be invalid"
 
-    # parse the forcast data
-    if 200 == r.status_code:
-      # parse the forecast information
-      print '====='
-      print r.text
-      print '====='
-      wlist = r.text.split(',')
-      for l in wlist:
-        print l
-        
+  # parse the forcast data
+  if 200 == r.status_code:
+    # parse the forecast information
+    wlist = r.text.split('{"dt":')
+    # first entry is garbage, get rid of it
+    del wlist[0]
+   
+    # wlist has forty entries. each starts with a unix timestamp.
+    # entry 0 is our 3 hour forecast
+    wd = parseWeather(wlist[0], 1)
+    # entry 7 is our 24 hour forecast
+    wd += parseWeather(wlist[7], 2)
+
+    return wd
+  else:
+    print 'Forecast error code: {}'.format(r.status_code)
+                  
 #==============================================================================
 # find and cleanup any Unicode
 def cleanupUnicode(str):
   str = string.replace(str, '\u0026', '&')
   str = string.replace(str, '&#x27;', '\'')
   str = string.replace(str, '&#x39;', '9')
+  str = string.replace(str, '&#39;', '`')
   return str    
 
 #==============================================================================
@@ -1016,7 +1093,7 @@ def getBME280():
   
 #  global Temperature
 #  global Humidity
-  global Barometer
+  global lastPressure
   
 
   # verify BMW280 is present by reading chip ID
@@ -1073,7 +1150,8 @@ def getBME280():
       tc = round((v1 + v2) / 5120.0, 1)
       tf = round((tc * 9 / 5) + 32.05, 1)
       # convert to text
-      tmsg = ' {0:0.1f}F'.format(tf)
+      # temerature is reading 5F too high so we compensate
+      tmsg = ' {0:0.1f}F'.format(tf - 5.0)
 
       # for Celcius temperature replace the three lines above with
       # tc = round((v1 + v2) / 5120.0, 1)
@@ -1132,8 +1210,6 @@ def getBME280():
     
       # pressure is in hPa or millibars
       fp /= 100.0
-      lastPressure = Barometer
-      Barometer = fp
   
       # convert to hectoPascals (hPa) or millibars
       pmsg = ' {0:0.1f} millibars'.format(fp)
@@ -1141,6 +1217,9 @@ def getBME280():
         pmsg += ' and rising'
       elif (int(lastPressure) > int(fp)):
         pmsg += ' and falling'
+        
+      # save current pressure reading
+      lastPressure = fp;
       
       msg = 'Environment:'
       if (temperature):
